@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <cstdlib>
 #include <string>
 #include <algorithm>
 
@@ -12,6 +13,7 @@ class AdjList {
 	AdjList();
 	~AdjList();
 	void read(const char * fn);
+	void view_data();
 	void add_edge(int a, int b);
 	void read_line(string line, vector<int> * tmp );
 	void collapse_random_edge();
@@ -27,13 +29,13 @@ AdjList::AdjList() : edge_count(0), node_count(0) {
 };
 
 AdjList::~AdjList() {
-    vector< vector<int> * >::iterator it;
-    for(it = edges.begin(); it != edges.end(); ++it) {
-	delete *it;
-    };
-    for(it = nodes.begin(); it != nodes.end(); ++it) {
-	delete *it;
-    };
+//    vector< vector<int> * >::iterator it;
+//    for(it = edges.begin(); it != edges.end(); ++it) {
+//	delete *it;
+//    };
+//    for(it = nodes.begin(); it != nodes.end(); ++it) {
+//	delete *it;
+//    };
 };
 
 void AdjList::add_edge( int a, int b ) {
@@ -68,12 +70,13 @@ void AdjList::read(const char * fn) {
 		cout << "resize to " << n << endl;
 		nodes.resize(n);
 	    };
+	    cout << "add node at idx " << n-1 << endl;
 	    nodes.at(n-1) = new vector<int>;
 	    if (nodes.at(n-1) == NULL) { abort(); };
 	    for(vector<int>::iterator it = tmp.begin()+1; it != tmp.end(); ++it) {
 		cout << "add " << *it << " to node " << n << "of size" << nodes.at(n-1)->size() << endl;
 		add_edge(n-1, ((*it)-1) );
-		nodes.at(n-1)->push_back(*it);
+		nodes.at(n-1)->push_back((*it)-1);
 	    };
 	tmp.clear();
 	};
@@ -82,24 +85,32 @@ void AdjList::read(const char * fn) {
 
 void AdjList::collapse_random_edge() {
     cout << "in collapse_random_edge" << endl;
-    int rand_numb = edge_count - 1;
+    int rand_numb = rand() % (edge_count - 1);
     vector<int> * edge = edges.at(rand_numb);
-    cout << "in collapse_random_edge edge is " << rand_numb << " " << edge->at(0) << " " << edge->at(1) << " " << nodes.size() << endl;
-    cout << "in collapse_random_edge nodes are" << nodes.at(edge->at(0)) << " " << nodes.at(edge->at(1)) << endl;
-    if ( nodes.at(edge->at(0)) != nodes.at(edge->at(1)) ) {
-	for(vector<int>::iterator it = nodes.at(edge->at(1))->begin(); it != nodes.at(edge->at(1))->end(); ++it) {
-	    if( (*it)-1 != edge->at(0) && (*it)-1 != edge->at(1) ) {
-		nodes.at(edge->at(0))->push_back((*it)-1);
+    vector<int> * node1 = nodes.at(edge->at(0)); 
+    vector<int> * node2 = nodes.at(edge->at(1)); 
+    vector<int> * new_node = new vector<int>; 
+    cout << "in collapse_random_edge" << edge->at(0) << " " << edge->at(1) << endl;
+    node2->end();
+    if ( node1 != node2 ) {
+	for(vector<int>::iterator it = node1->begin(); it != node1->end(); ++it) {
+	    if( nodes.at(*it) != node1 && nodes.at(*it) != node2 ) {
+		new_node->push_back(*it);
 	    };
 	};
-	delete nodes.at(edge->at(1));
-	nodes.at(edge->at(1)) = nodes.at(edge->at(0));
+	for(vector<int>::iterator it = node2->begin(); it != node2->end(); ++it) {
+	    if( nodes.at(*it) != node1 && nodes.at(*it) != node2 ) {
+		new_node->push_back(*it);
+	    };
+	};
+	//delete node2;
+	nodes.at(edge->at(0)) = new_node;
+	nodes.at(edge->at(1)) = new_node;
 	node_count--;
-    } else {
-	cout << "SAME" << endl;
     };
     swap( edges.at(rand_numb), edges.at( edge_count-1 ) );
     edge_count--;
+    view_data();
 };
 
 int AdjList::run_karger() {
@@ -110,9 +121,28 @@ int AdjList::run_karger() {
     return nodes.at(0)->size();
 };
 
+void AdjList::view_data() {
+    cout << "data " << endl;
+    int j;
+    int i;
+    for(i = 0; i < nodes.size(); i++ ) {
+	cout << "node size is " << nodes[i]->size() << " " << nodes[i] << endl;
+	for( j = 0; j < nodes[i]->size(); j++ ) {
+	    cout << nodes[i]->at(j) << endl;
+	};
+    };
+    cout << "/data " << endl;
+    cout << "edges" << endl;
+    for(i = 0; i < edge_count; i++ ) {
+	cout << edges[i]->at(0) << " " << edges[i]->at(1) << endl;
+    };
+    cout << "/edges" << endl;
+};
+
 int main( int argc, char ** argv ) {
     AdjList G;
     G.read(argv[1]);
-    cout << G.run_karger() << endl;
+    G.view_data();
+    cout << "result " << G.run_karger() << endl;
 };
 
