@@ -12,10 +12,8 @@ using namespace std;
 class AdjList {
     public:
 	AdjList();
-	~AdjList();
 	void read(const char * fn);
 	void load_nodes();
-	void view_data();
 	void add_edge(int a, int b);
 	void read_line(string line, vector<int> * tmp );
 	void collapse_random_edge();
@@ -29,16 +27,6 @@ class AdjList {
 };
 
 AdjList::AdjList() : edge_count(0), node_count(0) {
-};
-
-AdjList::~AdjList() {
-//    vector< vector<int> * >::iterator it;
-//    for(it = edges.begin(); it != edges.end(); ++it) {
-//	delete *it;
-//    };
-//    for(it = nodes.begin(); it != nodes.end(); ++it) {
-//	delete *it;
-//    };
 };
 
 void AdjList::add_edge( int a, int b ) {
@@ -87,17 +75,12 @@ void AdjList::read(const char * fn) {
 };
 
 void AdjList::collapse_random_edge() {
-    //cout << "in collapse" << endl;
     int rand_numb = rand() % (edge_count-1);
-    //cout << "rand " << rand_numb << endl;
-    //cout << "in collapse" << endl;
     vector<int> * edge = edges.at(rand_numb);
     vector<int> * node1 = nodes.at(edge->at(0)); 
     vector<int> * node2 = nodes.at(edge->at(1)); 
     vector<int> * new_node = new vector<int>; 
     vector<int>::iterator it;
-    //cout << "in collapse_random_edge " << edge->at(0) << " " << edge->at(1) << endl;
-    //cout << "nodes are " << node1 <<" " << node2 << endl;
     if ( node1 != node2 ) {
 	for( it = node1->begin(); it != node1->end(); ++it) {
 	    if( nodes.at(*it) != node1 && nodes.at(*it) != node2 ) {
@@ -109,7 +92,6 @@ void AdjList::collapse_random_edge() {
 		new_node->push_back(*it);
 	    };
 	};
-	// cout << "new size: " << new_node->size() << " old size: " << nodes.at(edge->at(0))->size() + nodes.at(edge->at(1))->size() << endl;
 	vector<int>::iterator it = new_node->begin();
 	nodes.at(edge->at(0))->assign(it, new_node->end() );
 
@@ -123,7 +105,6 @@ void AdjList::collapse_random_edge() {
     };
     swap( edges.at(rand_numb), edges.at( edge_count-1 ) );
     edge_count--;
-    // view_data();
 };
 
 int AdjList::run_karger() {
@@ -151,24 +132,6 @@ void AdjList::load_nodes() {
     };
 };
 
-void AdjList::view_data() {
-    cout << "data " << endl;
-    int j;
-    int i;
-    for(i = 0; i < nodes.size(); i++ ) {
-	cout << "node size is " << nodes[i]->size() << " " << nodes[i] << endl;
-	for( j = 0; j < nodes[i]->size(); j++ ) {
-	    cout << nodes[i]->at(j) << endl;
-	};
-    };
-    cout << "/data " << endl;
-//    cout << "edges" << endl;
-//    for(i = 0; i < edge_count; i++ ) {
-//	cout << edges[i]->at(0) << " " << edges[i]->at(1) << endl;
-//    };
-//    cout << "/edges" << endl;
-};
-
 int main( int argc, char ** argv ) {
     AdjList G;
     G.read(argv[1]);
@@ -176,7 +139,6 @@ int main( int argc, char ** argv ) {
     int tmp = 10000;
     for(int i = 0; i < 10000; i++ ) {
 	tmp = G.run_karger();
-	// cout << "intermediate result: "<< tmp << endl;
 	if( tmp < lowest ) { lowest = tmp; };
     };
     cout << "result " << lowest << endl;
