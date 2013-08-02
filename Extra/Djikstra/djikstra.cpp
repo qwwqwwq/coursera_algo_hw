@@ -30,13 +30,11 @@ class Node {
 	int name;
 };
 
-class mycomparison
-{
-public:
-  bool operator() (const Node * n1, const Node * n2) const
-  {
-    return (n1->dist > n2->dist);
-  };
+class node_cmp {
+    public:
+	bool operator() (const Node * n1, const Node * n2) const {
+	    return (n1->dist > n2->dist);
+	};
 };
 
 
@@ -52,14 +50,11 @@ class Graph {
     public:
 	void read(const char * fn);
 	void read_line( std::string line, std::vector<int> * tmp );
-	void DFS();
-	void DFS_visit(int i);
 	void djikstra();
     private:
 	std::vector<Node *> nodes;
 	std::vector<Node *> Q;
 	std::vector<Node *> previous;
-	std::vector<bool> visited;
 	boost::unordered_map<int,int> node_order;
 	int t;
 	int node_number;
@@ -96,7 +91,6 @@ void Graph::read(const char * fn) {
     nodes.insert(nodes.begin(), node_number, NULL);
     Q.insert(Q.begin(), node_number, NULL);
     previous.insert(previous.begin(), node_number, NULL);
-    visited.insert(visited.begin(), node_number, false);
     inf.clear();
     inf.seekg(0);
     while (std::getline(inf, line)) {
@@ -123,7 +117,7 @@ void Graph::djikstra () {
     Node * v;
     nodes.at(0)->dist = 0;
     std::cout << "Source node is: " << nodes.at(0)->name << std::endl;
-    std::make_heap( Q.begin(), Q.end(), mycomparison() );
+    std::make_heap( Q.begin(), Q.end(), node_cmp() );
     int alt;
     while( !Q.empty() ) {
 	std::pop_heap (Q.begin(),Q.end());
@@ -137,7 +131,7 @@ void Graph::djikstra () {
 	    if ( alt < nodes.at((*it).destination)->dist ) {
 		nodes.at((*it).destination)->dist = alt;
 		previous.at((*it).destination) = v;
-		std::make_heap( Q.begin(), Q.end(), mycomparison() );
+		std::make_heap( Q.begin(), Q.end(), node_cmp() );
 	    };
 	};
     };
