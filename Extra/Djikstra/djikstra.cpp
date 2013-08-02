@@ -2,10 +2,8 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <queue>
 #include <boost/unordered_map.hpp>
 #include <limits>
-#include <functional>     // std::greater
 #include <algorithm>
 
 class Edge {
