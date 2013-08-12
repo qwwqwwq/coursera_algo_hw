@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -20,12 +21,12 @@ Edge::Edge( int to, int d) {
 
 class Node {
     public:
-	Node(int);
+	Node(std::string);
 	void add_edge( int to, int d );
 	std::vector<Edge> edges;
 	int dist;
 	bool popped;
-	int name;
+	std::string name;
 };
 
 class node_cmp {
@@ -36,7 +37,7 @@ class node_cmp {
 };
 
 
-Node::Node( int n ) : dist(std::numeric_limits<int>::max()) {
+Node::Node( std::string n ) : dist(std::numeric_limits<int>::max()) {
     name = n;
 };
 
@@ -47,19 +48,19 @@ void Node::add_edge(int to, int d) {
 class Graph {
     public:
 	void read(const char * fn);
-	void read_line( std::string line, std::vector<int> * tmp );
+	void read_line( std::string line, std::vector<std::string> * tmp );
 	void djikstra();
     private:
 	std::vector<Node *> nodes;
 	std::vector<Node *> Q;
 	std::vector<Node *> previous;
-	boost::unordered_map<int,int> node_order;
+	boost::unordered_map<std::string,int> node_order;
 	int t;
 	int node_number;
 };
 
-void Graph::read_line( std::string line, std::vector<int> * tmp ) {
-    int n;
+void Graph::read_line( std::string line, std::vector<std::string> * tmp ) {
+    std::string n;
     std::istringstream sstr (line);
     while(sstr >> n) {
 	tmp->push_back(n);
@@ -71,16 +72,20 @@ void Graph::read(const char * fn) {
     std::string line;
     int n;
     node_number = 0;
-    std::vector<int> tmp;
+    std::string child;
+    int dist;
+    std::vector<std::string> tmp;
+    std::vector<std::string>::iterator it;
     while (std::getline(inf, line)) {
 	read_line(line, &tmp);
-	if ( tmp.size() == 3 ) {
-	    if( node_order.find(tmp.at(0)) == node_order.end() ) {
-		node_order[tmp.at(0)] = node_number;
-		node_number++;
-	    };
-	    if( node_order.find(tmp.at(1)) == node_order.end() ) {
-		node_order[tmp.at(1)] = node_number;
+	if( node_order.find(tmp.at(0)) == node_order.end() ) {
+	    node_order[tmp.at(0)] = node_number;
+	    node_number++;
+	};
+	for( it = tmp.begin()+1; it != tmp.end(); it++ ) {
+	    child = (*it).substr(0, (*it).find(","));
+	    if( node_order.find(child) == node_order.end() ) {
+		node_order[child] = node_number;
 		node_number++;
 	    };
 	};
@@ -93,18 +98,21 @@ void Graph::read(const char * fn) {
     inf.seekg(0);
     while (std::getline(inf, line)) {
 	read_line(line, &tmp);
-	if ( tmp.size() == 3 ) {
-	    if( nodes.at(node_order[tmp.at(0)]) == NULL ) {
-		nodes.at(node_order[tmp.at(0)]) = new Node( tmp.at(0) );
-		if ( nodes.at(node_order[tmp.at(0)]) == NULL ) { abort(); };
-		Q.at(node_order[tmp.at(0)]) = nodes.at(node_order[tmp.at(0)]);
+	if( nodes.at(node_order[tmp.at(0)]) == NULL ) {
+	    nodes.at(node_order[tmp.at(0)]) = new Node( tmp.at(0) );
+	    if ( nodes.at(node_order[tmp.at(0)]) == NULL ) { abort(); };
+	    Q.at(node_order[tmp.at(0)]) = nodes.at(node_order[tmp.at(0)]);
+	};
+	for( it = tmp.begin()+1; it != tmp.end(); it++ ) {
+	    child = (*it).substr(0, (*it).find(","));
+	    (*it).erase(0, (*it).find(",")+1 );
+	    dist = atoi((*it).c_str());
+	    if( nodes.at(node_order[child]) == NULL ) {
+		nodes.at(node_order[child]) = new Node( child );
+		if ( nodes.at(node_order[child]) == NULL ) { abort(); };
+		Q.at(node_order[child]) = nodes.at(node_order[child]);
 	    };
-	    if( nodes.at(node_order[tmp.at(1)]) == NULL ) {
-		nodes.at(node_order[tmp.at(1)]) = new Node( tmp.at(1) );
-		if ( nodes.at(node_order[tmp.at(1)]) == NULL ) { abort(); };
-		Q.at(node_order[tmp.at(1)]) = nodes.at(node_order[tmp.at(1)]);
-	    };
-	    nodes.at(node_order[tmp.at(0)])->add_edge(node_order[tmp.at(1)], tmp.at(2));
+	    nodes.at(node_order[tmp.at(0)])->add_edge(node_order[child], dist);
 	};
 	tmp.clear();
     };
